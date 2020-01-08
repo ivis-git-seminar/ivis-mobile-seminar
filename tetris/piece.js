@@ -31,3 +31,24 @@ class Piece {
       });
     });
   }
+
+  move(p) {
+    if(!this.hardDropped){
+      this.x = p.x;
+      this.y = p.y;
+    }
+    this.shape = p.shape;
+  }
+
+  hardDrop(){
+    this.hardDropped = true;
+  }
+
+  setStartingPosition() {
+    this.x = this.typeId === 4 ? 4 : 3;
+  }
+
+  randomizeTetrominoType(noOfTypes) {
+    return Math.floor(Math.random() * noOfTypes + 1);
+  }
+}
