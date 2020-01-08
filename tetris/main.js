@@ -18,10 +18,10 @@ function updateAccount(key, value) {
 
 let account = new Proxy(accountValues, {
     set: (target, key, value) => {
-    target[key] = value;
-updateAccount(key, value);
-return true;
-}
+        target[key] = value;
+        updateAccount(key, value);
+        return true;
+    }
 });
 
 let requestId;
@@ -46,40 +46,33 @@ function initNext() {
     ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
 }
 
-function initNext() {
-    // Calculate size of canvas from constants.
-    ctxNext.canvas.width = 4 * BLOCK_SIZE;
-    ctxNext.canvas.height = 4 * BLOCK_SIZE;
-    ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
-}
-
 function addEventListener() {
     document.addEventListener('keydown', event => {
         if (event.keyCode === KEY.P) {
-        pause();
-    }
-    if (event.keyCode === KEY.ESC) {
-        gameOver();
-    } else if (moves[event.keyCode]) {
-        event.preventDefault();
-        // Get new state
-        let p = moves[event.keyCode](board.piece);
-        if (event.keyCode === KEY.SPACE) {
-            // Hard drop
-            while (board.valid(p)) {
-                account.score += POINTS.HARD_DROP;
+            pause();
+        }
+        if (event.keyCode === KEY.ESC) {
+            gameOver();
+        } else if (moves[event.keyCode]) {
+            event.preventDefault();
+            // Get new state
+            let p = moves[event.keyCode](board.piece);
+            if (event.keyCode === KEY.SPACE) {
+                // Hard drop
+                while (board.valid(p)) {
+                    account.score += POINTS.HARD_DROP;
+                    board.piece.move(p);
+                    p = moves[KEY.DOWN](board.piece);
+                }
+                board.piece.hardDrop();
+            } else if (board.valid(p)) {
                 board.piece.move(p);
-                p = moves[KEY.DOWN](board.piece);
-            }
-            board.piece.hardDrop();
-        } else if (board.valid(p)) {
-            board.piece.move(p);
-            if (event.keyCode === KEY.DOWN) {
-                account.score += POINTS.SOFT_DROP;
+                if (event.keyCode === KEY.DOWN) {
+                    account.score += POINTS.SOFT_DROP;
+                }
             }
         }
-    }
-});
+    });
 }
 
 function resetGame() {
@@ -117,4 +110,29 @@ function animate(now = 0) {
 
     board.draw();
     requestId = requestAnimationFrame(animate);
+}
+
+function gameOver() {
+    cancelAnimationFrame(requestId);
+    ctx.fillStyle = 'black';
+    ctx.fillRect(1, 3, 8, 1.2);
+    ctx.font = '1px Arial';
+    ctx.fillStyle = 'red';
+    ctx.fillText('GAME OVER', 1.8, 4);
+}
+
+function pause() {
+    if (!requestId) {
+        animate();
+        return;
+    }
+
+    cancelAnimationFrame(requestId);
+    requestId = null;
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(1, 3, 8, 1.2);
+    ctx.font = '1px Arial';
+    ctx.fillStyle = 'yellow';
+    ctx.fillText('PAUSED', 3, 4);
 }
